@@ -17,14 +17,14 @@ export function getPortInfo(port: number, banner?: string): IPortInfo {
   }
 
   if (banner) {
-    const refined = refineBanner(port, banner, info);
+    const refined = refineBanner(port, banner);
     if (refined) return refined;
   }
 
   return info;
 }
 
-function refineBanner(port: number, banner: string, defaultInfo: IPortInfo): IPortInfo | null {
+function refineBanner(port: number, banner: string): IPortInfo | null {
   const lower = banner.toLowerCase();
 
   if (port === 3000) {

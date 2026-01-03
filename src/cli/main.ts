@@ -14,7 +14,13 @@ function formatScanResult(result: IScanResult): void {
   console.log(`Ports Scanned: ${result.totalPortsScanned}`);
   console.log(`Open Ports: ${result.openPorts.length}`);
 
-  console.log(`\nVulnerabilities: ${result.summary.critical}C / ${result.summary.high}H / ${result.summary.medium}M / ${result.summary.low}L`);
+  console.log(
+    `\nVulnerabilities:` +
+    ` Critical: ${result.summary.critical},` +
+    ` High: ${result.summary.high},` +
+    ` Medium: ${result.summary.medium},` +
+    ` Low: ${result.summary.low}`
+  );
 
   if (result.openPorts.length === 0) {
     console.log(`\nNo open ports found.`);
@@ -96,15 +102,15 @@ async function main() {
       description: "Maximum concurrent connections",
       default: 200,
     })
-    .option("no-fingerprint", {
+    .option("fingerprint", {
       type: "boolean",
-      description: "Disable service fingerprinting",
-      default: false,
+      description: "Enable service fingerprinting",
+      default: true,
     })
-    .option("no-vuln-check", {
+    .option("vuln-check", {
       type: "boolean",
-      description: "Disable vulnerability checks",
-      default: false,
+      description: "Enable vulnerability checks",
+      default: true,
     })
     .option("json", {
       alias: "j",
@@ -115,36 +121,38 @@ async function main() {
     .example("$0 example.com", "Full port scan")
     .example("$0 example.com --quick", "Quick scan (common ports)")
     .example("$0 example.com --range 1-1000", "Scan ports 1-1000")
+    .example("$0 example.com --fingerprint=false", "Disable service fingerprinting")
+    .example("$0 example.com --vuln-check=false", "Disable vulnerability checks")
     .example("$0 example.com --json", "Output as JSON")
     .strict()
     .parseSync();
 
-  const host = argv.host as string;
+  const host = argv["host"] as string;
 
   console.log(`Starting port scan on ${host}...`);
 
   const scanner = new PortScanner({
     connectTimeout: argv.timeout,
     maxConcurrency: argv.concurrency,
-    enableFingerprinting: !argv["no-fingerprint"],
-    enableVulnerabilityChecks: !argv["no-vuln-check"],
+    enableFingerprinting: argv.fingerprint,
+    enableVulnerabilityChecks: argv.vulnCheck,
   });
 
-  let result: IScanResult;
-
   try {
-    if (argv.quick) {
-      result = await scanner.quickScan(host);
-    } else if (argv.range) {
-      const [start, end] = argv.range.split("-").map(Number);
-      if (!start || !end || start > end) {
-        console.error("Invalid port range. Use format: 1-1000");
-        process.exit(1);
+    const result: IScanResult = await (async () => {
+      if (argv.quick) {
+        return scanner.quickScan(host);
+      } else if (argv.range) {
+        const [start, end] = argv.range.split("-").map(Number);
+        if (!start || !end || start > end) {
+          console.error("Invalid port range. Use format: 1-1000");
+          process.exit(1);
+        }
+        return scanner.scanRange(host, start, end);
+      } else {
+        return scanner.scan(host);
       }
-      result = await scanner.scanRange(host, start, end);
-    } else {
-      result = await scanner.scan(host);
-    }
+    })();
 
     if (argv.json) {
       console.log(JSON.stringify(result, null, 2));
@@ -152,15 +160,12 @@ async function main() {
       formatScanResult(result);
     }
 
-    // Exit with appropriate code based on severity
-    if (result.summary.critical > 0) {
-      process.exit(2);
-    } else if (result.summary.high > 0) {
-      process.exit(1);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(`\nScan failed: ${error.message}`);
+    } else {
+      console.error("\nScan failed:", error);
     }
-
-  } catch (error: any) {
-    console.error(`\nScan failed: ${error.message}`);
     process.exit(1);
   }
 }

@@ -1,4 +1,4 @@
-import { IPortInfo, IScanOptions } from "./types";
+import { IPortInfo, IScanOptions } from "./types.js";
 
 export const WELL_KNOWN_PORTS: Record<number, IPortInfo> = {
   80: { service: "HTTP", category: "web", description: "Hypertext Transfer Protocol" },

@@ -1,5 +1,5 @@
 import { WELL_KNOWN_PORTS } from "./constants.js";
-import type { IPortInfo, IVulnerability } from "./types.js";
+import type { IPortInfo } from "./types.js";
 
 export function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -17,14 +17,14 @@ export function getPortInfo(port: number, banner?: string): IPortInfo {
   }
 
   if (banner) {
-    const refined = refineBanner(port, banner);
+    const refined = refineBanner(port, banner, info);
     if (refined) return refined;
   }
 
   return info;
 }
 
-function refineBanner(port: number, banner: string): IPortInfo | null {
+function refineBanner(port: number, banner: string, defaultInfo: IPortInfo): IPortInfo | null {
   const lower = banner.toLowerCase();
 
   if (port === 3000) {
@@ -55,12 +55,6 @@ function refineBanner(port: number, banner: string): IPortInfo | null {
   }
 
   return null;
-}
-
-export function calculateRiskScore(vulnerabilities: IVulnerability[]): number {
-  const weights = { CRITICAL: 25, HIGH: 15, MEDIUM: 8, LOW: 3, INFO: 0 };
-  const score = vulnerabilities.reduce((sum, v) => sum + weights[v.severity], 0);
-  return Math.min(score, 100);
 }
 
 export async function measureTime<T>(fn: () => Promise<T>): Promise<{ result: T; timeMs: number }> {

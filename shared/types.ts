@@ -55,7 +55,6 @@ export interface IScanResult {
   openPorts: IProbeResult[];
   totalPortsScanned: number;
   scanTime: TimingMsType;
-  osInference?: string;
   summary: {
     critical: number;
     high: number;

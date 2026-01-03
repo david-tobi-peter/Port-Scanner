@@ -63,11 +63,15 @@
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
+    "@types/yargs": "^17.0.35",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "yargs": "^18.0.0"
   }
 }

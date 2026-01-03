@@ -1,0 +1,25 @@
+{
+  "name": "port-probe",
+  "version": "0.1.0",
+  "description": "Lightweight TCP port probe for behavioral inference (not service identification)",
+  "type": "module",
+  "bin": {
+    "port-probe": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node index.ts",
+    "devd": "ts-node indexd.ts"
+  },
+  "dependencies": {
+    "@david-tobi-peter/request-tracer": "^1.0.1",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/yargs": "^17.0.32",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0"
+  }
+}

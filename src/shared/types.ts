@@ -27,13 +27,14 @@ export interface IServiceFingerprint {
 }
 
 export interface IProbeResult {
+  hostname: string;
   port: number;
   state: PortStateType;
   info: IPortInfo;
   behavior?: PortBehaviorType;
   inference?: string;
   stability?: StabilityType;
-  fingerprint?: IServiceFingerprint;
+  fingerprint: IServiceFingerprint;
   vulnerabilities: IVulnerability[];
   responseTime: TimingMsType;
 }

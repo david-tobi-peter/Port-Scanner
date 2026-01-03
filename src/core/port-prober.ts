@@ -10,20 +10,21 @@ export class PortProber {
     this.options = { ...DEFAULT_SCAN_OPTIONS, ...options };
   }
 
-  async probe(ip: string, port: number): Promise<IProbeResult> {
+  async probe(hostname: string, port: number): Promise<IProbeResult> {
     const socket = new net.Socket();
     const startTime = process.hrtime.bigint();
 
     let connected = false;
     let sawData = false;
-    let dataReceived = "";
 
     const result: IProbeResult = {
+      hostname,
       port,
       state: "FILTERED" as PortStateType,
       info: getPortInfo(port),
       vulnerabilities: [],
       responseTime: 0,
+      fingerprint: { identified: false }
     };
 
     return new Promise((resolve) => {
@@ -43,18 +44,10 @@ export class PortProber {
         }, this.options.idleObserve);
       });
 
-      socket.on("data", (chunk: Buffer) => {
+      socket.on("data", (chunk) => {
         sawData = true;
-        dataReceived += chunk.toString("utf8", 0, Math.min(chunk.length, 512));
-
         result.behavior = "sent_data";
-        result.inference = "Service sends banner/data immediately after connection";
-        result.info = getPortInfo(port, dataReceived);
-
-        if (result.fingerprint) {
-          result.fingerprint.banner = dataReceived;
-        }
-
+        result.fingerprint.banner = chunk.toString("utf8", 0, Math.min(chunk.length, 512));
         socket.destroy();
       });
 
@@ -95,14 +88,14 @@ export class PortProber {
         resolve(result);
       });
 
-      socket.connect(port, ip);
+      socket.connect(port, hostname);
     });
   }
 
-  async assessStability(ip: string, port: number): Promise<StabilityType> {
+  async assessStability(hostname: string, port: number): Promise<StabilityType> {
     for (let i = 0; i < this.options.stabilityRetries; i++) {
       await delay(this.options.stabilityDelay);
-      const res = await this.probe(ip, port);
+      const res = await this.probe(hostname, port);
 
       if (res.state !== "OPEN") {
         return "EPHEMERAL";

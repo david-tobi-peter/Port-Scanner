@@ -2,7 +2,7 @@ import dns from "node:dns/promises";
 import { PortProber } from "./port-prober.js";
 import { ServiceFingerprinter } from "./service-finger-printer.js";
 import { VulnerabilityAnalyzer } from "./vulnerability-analyzer.js";
-import { measureTime, getElapsedTime } from "../shared/utils.js";
+import { getElapsedTime } from "../shared/utils.js";
 import type { IProbeResult, IScanOptions, IScanResult } from "../shared/types.js";
 import { DEFAULT_SCAN_OPTIONS } from "../shared/constants.js";
 
@@ -22,10 +22,21 @@ export class PortScanner {
   async scan(host: string): Promise<IScanResult> {
     const scanStartTime = process.hrtime.bigint();
 
-    const { result: address } = await measureTime(async () => {
-      const lookup = await dns.lookup(host);
-      return lookup.address;
-    });
+    const hostname = (() => {
+      let h = host;
+      if (h.startsWith("http://")) h = h.slice("http://".length);
+      else if (h.startsWith("https://")) h = h.slice("https://".length);
+
+      const slashIndex = h.indexOf("/");
+      if (slashIndex !== -1) h = h.slice(0, slashIndex);
+
+      const colonIndex = h.indexOf(":");
+      if (colonIndex !== -1) h = h.slice(0, colonIndex);
+
+      return h;
+    })();
+
+    const { address } = await dns.lookup(hostname);
 
     const openPorts = await this.scanPorts(address);
 
@@ -48,14 +59,10 @@ export class PortScanner {
   }
 
   async scanRange(host: string, startPort: number, endPort: number): Promise<IScanResult> {
-    const prevRange = this.options.portRange;
-    this.options.portRange = { start: startPort, end: endPort };
+    const rangeOptions = { ...this.options, portRange: { start: startPort, end: endPort } };
+    const scanner = new PortScanner(rangeOptions);
 
-    try {
-      return await this.scan(host);
-    } finally {
-      this.options.portRange = prevRange;
-    }
+    return scanner.scan(host);
   }
 
   async quickScan(host: string): Promise<IScanResult> {

@@ -1,25 +1,73 @@
 {
-  "name": "port-probe",
-  "version": "0.1.0",
-  "description": "Lightweight TCP port probe for behavioral inference (not service identification)",
+  "name": "@david-tobi-peter/port-prober",
+  "version": "1.0.0",
+  "description": "",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": {
-    "port-probe": "./dist/index.js"
+    "port-prober": "./dist/cli/main.js"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node index.ts",
-    "devd": "ts-node indexd.ts"
+    "build": "npm run clean && tsc",
+    "clean": "rm -rf dist",
+    "start": "node ./dist/cli/main.js",
+    "dev": "tsx src/cli/main.ts",
+    "prepublishOnly": "npm run build",
+    "postbuild": "chmod +x ./dist/cli/main.js"
   },
-  "dependencies": {
-    "@david-tobi-peter/request-tracer": "^1.0.1",
-    "yargs": "^17.7.2"
+  "keywords": [
+    "http",
+    "tracer",
+    "dns",
+    "tcp",
+    "tls",
+    "network",
+    "timing",
+    "performance",
+    "diagnostics",
+    "debugging"
+  ],
+  "author": {
+    "name": "David Oluwatobi",
+    "email": "davidoluwatobi41@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "David Oluwatobi",
+      "email": "davidoluwatobi41@gmail.com"
+    }
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/david-tobi-peter/port-prober.git"
+  },
+  "bugs": {
+    "url": "https://github.com/david-tobi-peter/port-prober/issues"
+  },
+  "homepage": "https://github.com/david-tobi-peter/port-prober#readme",
+  "engines": {
+    "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "@types/yargs": "^17.0.32",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.4.0"
+    "@types/node": "^25.0.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

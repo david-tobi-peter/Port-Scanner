@@ -1,12 +1,12 @@
 {
-  "name": "@david-tobi-peter/port-prober",
+  "name": "@david-tobi-peter/port-scanner",
   "version": "1.0.0",
   "description": "",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "port-prober": "./dist/cli/main.js"
+    "port-scanner": "./dist/cli/main.js"
   },
   "exports": {
     ".": {
@@ -52,12 +52,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/david-tobi-peter/port-prober.git"
+    "url": "git+https://github.com/david-tobi-peter/port-scanner.git"
   },
   "bugs": {
-    "url": "https://github.com/david-tobi-peter/port-prober/issues"
+    "url": "https://github.com/david-tobi-peter/port-scanner/issues"
   },
-  "homepage": "https://github.com/david-tobi-peter/port-prober#readme",
+  "homepage": "https://github.com/david-tobi-peter/port-scanner#readme",
   "engines": {
     "node": ">=18.0.0"
   },

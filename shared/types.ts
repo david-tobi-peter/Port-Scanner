@@ -24,7 +24,6 @@ export interface IServiceFingerprint {
   service?: string;
   version?: string;
   banner?: string;
-  confidence: number;
 }
 
 export interface IProbeResult {
@@ -41,10 +40,10 @@ export interface IProbeResult {
 
 export interface IScanOptions {
   connectTimeout?: TimingMsType;
-  idleObserve?: number;
+  idleObserve?: TimingMsType;
   maxConcurrency?: number;
   stabilityRetries?: number;
-  stabilityDelay?: number;
+  stabilityDelay?: TimingMsType;
   enableFingerprinting?: boolean;
   enableVulnerabilityChecks?: boolean;
   portRange?: { start: number; end: number };
@@ -57,7 +56,6 @@ export interface IScanResult {
   totalPortsScanned: number;
   scanTime: TimingMsType;
   osInference?: string;
-  riskScore: number;
   summary: {
     critical: number;
     high: number;

@@ -1,6 +1,6 @@
 import net from "net";
 import { getPortInfo, delay, getElapsedTime } from "../shared/utils.js";
-import type { IProbeResult, IScanOptions, PortStateType, StabilityType } from "../shared/types.js";
+import type { IProbeResult, IScanOptions, PortStateType } from "../shared/types.js";
 import { DEFAULT_SCAN_OPTIONS } from "../shared/constants.js";
 
 export class PortProber {
@@ -92,28 +92,22 @@ export class PortProber {
     });
   }
 
-  async assessStability(hostname: string, port: number): Promise<StabilityType> {
-    for (let i = 0; i < this.options.stabilityRetries; i++) {
-      await delay(this.options.stabilityDelay);
-      const res = await this.probe(hostname, port);
-
-      if (res.state !== "OPEN") {
-        return "EPHEMERAL";
-      }
-    }
-
-    return "STABLE";
-  }
-
-  async probeWithStability(ip: string, port: number): Promise<IProbeResult> {
-    const result = await this.probe(ip, port);
+  async probeWithStability(hostname: string, port: number): Promise<IProbeResult> {
+    const result = await this.probe(hostname, port);
 
     if (result.state === "OPEN") {
-      result.stability = await this.assessStability(ip, port);
+      for (let i = 0; i < this.options.stabilityRetries; i++) {
+        await delay(this.options.stabilityDelay);
+        const res = await this.probe(hostname, port);
 
-      if (result.stability === "EPHEMERAL") {
-        result.inference = "Ephemeral/dynamic port (likely outbound connection, not service)";
+        if (res.state !== "OPEN") {
+          result.stability = "EPHEMERAL";
+          result.inference = "Ephemeral/dynamic port (likely outbound connection, not service)";
+          return result;
+        }
       }
+
+      result.stability = "STABLE";
     }
 
     return result;

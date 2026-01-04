@@ -36,7 +36,17 @@ export class PortScanner {
       return h;
     })();
 
-    const { address } = await dns.lookup(hostname);
+    const address = await (async () => {
+      const isIPv4 = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
+      const isIPv6 = /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/.test(hostname);
+
+      if (isIPv4 || isIPv6) {
+        return hostname;
+      }
+
+      const lookup = await dns.lookup(hostname);
+      return lookup.address;
+    })();
 
     const openPorts = await this.scanPorts(address);
 
@@ -83,7 +93,8 @@ export class PortScanner {
 
     for (const res of results) {
       if (res.state === "OPEN") {
-        res.stability = await this.prober.assessStability(address, res.port);
+        const portBehaviour = await this.prober.probeWithStability(address, res.port);
+        res.stability = portBehaviour.stability
 
         if (this.options.enableFingerprinting) {
           res.fingerprint = await this.fingerprinter.fingerprint(address, res.port, res.fingerprint?.banner);
